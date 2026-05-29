@@ -6,9 +6,12 @@ import { PatientService } from './patient.service';
 import { PatientController } from './patient.controller';
 import { UserClinic } from 'src/modules/clinic/entities/user-clinic.entity';
 import { Appointment } from '../appointment/entities/appointment.entity';
+import { Consult } from '../consult/entities/consult.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Patient, UserClinic, Appointment])],
+  imports: [
+    TypeOrmModule.forFeature([Patient, UserClinic, Appointment, Consult]),
+  ],
   controllers: [PatientController],
   providers: [PatientService],
 })

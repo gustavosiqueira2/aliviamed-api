@@ -5,13 +5,16 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { IsNull, Not, Repository } from 'typeorm';
 
 import { Patient } from './entities/patient.entity';
 
 import { CreatePatientDto } from './dto/create-patient.dto';
 import { UserClinic } from 'src/modules/clinic/entities/user-clinic.entity';
 import { UpdatePatientDto } from './dto/update-patient.dto';
+import { Consult } from '../consult/entities/consult.entity';
+import { AppointmentStatus } from 'src/utils/enum/appointment-status.enum';
+import { formatConsultResponse } from 'src/utils/functions/formatConsultResponse';
 
 @Injectable()
 export class PatientService {
@@ -20,6 +23,8 @@ export class PatientService {
     private readonly patientRepository: Repository<Patient>,
     @InjectRepository(UserClinic)
     private readonly userClinicRepository: Repository<UserClinic>,
+    @InjectRepository(Consult)
+    private readonly consultRepository: Repository<Consult>,
   ) {}
 
   async create(data: CreatePatientDto, userId: string, clinicId: string) {
@@ -39,6 +44,10 @@ export class PatientService {
     const patient = this.patientRepository.create({
       name: data.name,
       birthdate: new Date(data.birthdate),
+      phone: data.phone,
+      document: data.document,
+      sex: data.sex,
+      email: data.email,
       clinic: userClinic.clinic,
     });
 
@@ -143,7 +152,7 @@ export class PatientService {
       throw new NotFoundException(['Paciente não encontrado']);
     }
 
-    if (!data.name && !data.birthdate) {
+    if (Object.keys(data).length === 0) {
       throw new BadRequestException([
         'Informe ao menos um campo para atualizar',
       ]);
@@ -157,6 +166,44 @@ export class PatientService {
       patient.birthdate = new Date(data.birthdate);
     }
 
+    if (data.phone !== undefined) {
+      patient.phone = data.phone;
+    }
+
+    if (data.document !== undefined) {
+      patient.document = data.document;
+    }
+
+    if (data.sex !== undefined) {
+      patient.sex = data.sex;
+    }
+
+    if (data.email !== undefined) {
+      patient.email = data.email;
+    }
+
     return this.patientRepository.save(patient);
+  }
+
+  async findPatientHistory(patientId: string, clinicId: string) {
+    const consults = await this.consultRepository.find({
+      where: {
+        finishedAt: Not(IsNull()),
+        appointment: {
+          patient: { id: patientId },
+          clinic: { id: clinicId },
+          status: AppointmentStatus.COMPLETED,
+        },
+      },
+      relations: [
+        'appointment',
+        'appointment.patient',
+        'appointment.professional',
+      ],
+      order: { finishedAt: 'DESC' },
+      take: 50,
+    });
+
+    return consults.map((consult) => formatConsultResponse(consult));
   }
 }

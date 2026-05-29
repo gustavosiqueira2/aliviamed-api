@@ -1,4 +1,10 @@
-import { IsOptional, IsString, IsDateString } from 'class-validator';
+import {
+  IsDateString,
+  IsEmail,
+  IsIn,
+  IsOptional,
+  IsString,
+} from 'class-validator';
 
 export class UpdatePatientDto {
   @IsOptional()
@@ -8,4 +14,20 @@ export class UpdatePatientDto {
   @IsOptional()
   @IsDateString()
   birthdate?: string;
+
+  @IsOptional()
+  @IsString()
+  phone?: string;
+
+  @IsOptional()
+  @IsString()
+  document?: string;
+
+  @IsOptional()
+  @IsIn(['MALE', 'FEMALE', 'OTHER'])
+  sex?: string;
+
+  @IsOptional()
+  @IsEmail()
+  email?: string;
 }

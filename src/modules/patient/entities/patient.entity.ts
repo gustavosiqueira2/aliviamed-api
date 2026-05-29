@@ -12,6 +12,18 @@ export class Patient extends BaseEntity {
   @Column({ type: 'date' })
   birthdate!: Date;
 
+  @Column({ type: 'varchar', nullable: true })
+  phone?: string;
+
+  @Column({ type: 'varchar', nullable: true })
+  document?: string;
+
+  @Column({ type: 'varchar', nullable: true })
+  sex?: string;
+
+  @Column({ type: 'varchar', nullable: true })
+  email?: string;
+
   @ManyToOne(() => Clinic, (clinic) => clinic.patients, {
     nullable: false,
   })

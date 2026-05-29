@@ -67,4 +67,14 @@ export class PatientController {
   ) {
     return this.patientService.update(id, clinicId, body);
   }
+
+  @Get(':patientId/consult')
+  findPatientHistory(
+    @Param('patientId')
+    patientId: string,
+    @CurrentClinic()
+    clinicId: string,
+  ) {
+    return this.patientService.findPatientHistory(patientId, clinicId);
+  }
 }

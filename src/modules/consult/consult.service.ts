@@ -10,6 +10,7 @@ import { IsNull, Repository } from 'typeorm';
 import { AppointmentStatus } from 'src/utils/enum/appointment-status.enum';
 import { Consult } from './entities/consult.entity';
 import { UpdateConsultDto } from './dto/update-consult.dto';
+import { formatConsultResponse } from 'src/utils/functions/formatConsultResponse';
 
 @Injectable()
 export class ConsultService {
@@ -82,7 +83,7 @@ export class ConsultService {
       throw new NotFoundException(['Consulta não encontrada']);
     }
 
-    return this.formatConsultResponse(consult);
+    return formatConsultResponse(consult);
   }
 
   async findMyActiveConsult(userId: string, clinicId: string) {
@@ -110,7 +111,7 @@ export class ConsultService {
       return null;
     }
 
-    return this.formatConsultResponse(consult);
+    return formatConsultResponse(consult);
   }
 
   async update(id: string, clinicId: string, data: UpdateConsultDto) {
@@ -138,7 +139,7 @@ export class ConsultService {
 
     await this.consultRepository.save(consult);
 
-    return this.formatConsultResponse(consult);
+    return formatConsultResponse(consult);
   }
 
   async finish(consultId: string, clinicId: string) {
@@ -165,34 +166,5 @@ export class ConsultService {
     await this.appointmentRepository.save(consult.appointment);
 
     return { message: 'Consulta finalizada com sucesso' };
-  }
-
-  private formatConsultResponse(consult: Consult) {
-    return {
-      id: consult.id,
-      createdAt: consult.createdAt,
-      updatedAt: consult.updatedAt,
-      startedAt: consult.startedAt,
-      finishedAt: consult.finishedAt,
-      complaint: consult.complaint,
-      evolution: consult.evolution,
-      diagnosis: consult.diagnosis,
-      prescription: consult.prescription,
-      notes: consult.notes,
-      appointment: {
-        id: consult.appointment.id,
-        status: consult.appointment.status,
-        startsAt: consult.appointment.startsAt,
-        endsAt: consult.appointment.endsAt,
-      },
-      patient: {
-        id: consult.appointment.patient.id,
-        name: consult.appointment.patient.name,
-      },
-      professional: {
-        id: consult.appointment.professional.id,
-        name: consult.appointment.professional.name,
-      },
-    };
   }
 }
